@@ -4,6 +4,7 @@ import "time"
 
 type Blog struct {
 	Id        string    `json:"id"`
+	UserId    string    `json:"user_id"`
 	Title     string    `json:"title"`
 	Content   string    `json:"content"`
 	Category  string    `json:"category"`
