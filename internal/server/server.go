@@ -21,7 +21,7 @@ type Server struct {
 func InitializeServer(router *gin.Engine, portAdd string) *Server {
 	return &Server{
 		server: &http.Server{
-			Addr:         portAdd,
+			Addr:         fmt.Sprintf(":%s", portAdd),
 			Handler:      router,
 			IdleTimeout:  time.Minute,
 			ReadTimeout:  10 * time.Second,
