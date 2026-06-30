@@ -34,7 +34,7 @@ func Load() (*Config, error) {
 
 }
 
-func (c *Config) ValidateConfig() error {
+func (c *Config) Validate() error {
 	if c.Secret == "" || c.DatabaseURL == "" || c.Port == "" {
 		return fmt.Errorf("%w: %w", Error.ErrFailedConfiguration, envMissingVariables)
 
