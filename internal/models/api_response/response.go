@@ -29,3 +29,15 @@ type BlogsResponse struct {
 	NextCursor any           `json:"next_cursor"`
 	HasNext    bool          `json:"has_next"`
 }
+
+type BulkDeleteSummary struct {
+	Total   int `json:"total"`
+	Deleted int `json:"deleted"`
+	Failed  int `json:"failed"`
+}
+
+type BulkDeleteResponse struct {
+	Succeeded []string          `json:"succeeded"`
+	Failed    []string          `json:"failed"`
+	Summary   BulkDeleteSummary `json:"summary"`
+}
