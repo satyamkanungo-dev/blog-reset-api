@@ -6,3 +6,15 @@ type APIResponse struct {
 	Message string `json:"message,omitempty"`
 	Data    any    `json:"data,omitempty"`
 }
+
+type UserResponse struct {
+	Id       string `json:"id"`
+	UserName string `json:"username"`
+	Email    string `json:"email"`
+}
+
+type AuthResponse struct {
+	AccessToken  string       `json:"access_token"`
+	RefreshToken string       `json:"refresh_token"`
+	User         UserResponse `json:"user"`
+}
