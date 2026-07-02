@@ -1,4 +1,4 @@
-package migrate
+package main
 
 import (
 	"database/sql"
@@ -11,7 +11,7 @@ import (
 	"github.com/satyamkanungo-dev/blog-rest-api/internal/config"
 )
 
-const migrationPath = "../../migrations/"
+const migrationPath = "migrations/"
 
 func main() {
 	if len(os.Args) < 2 {
