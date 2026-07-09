@@ -15,6 +15,7 @@ type UserResponse struct {
 	Id       string `json:"id"`
 	UserName string `json:"username"`
 	Email    string `json:"email"`
+	Role     string `json:"role"`
 }
 
 type AuthResponse struct {
