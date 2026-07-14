@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -35,6 +36,8 @@ func (u *UserRepo) Create(ctx context.Context, name, email, password, role strin
 		&user.Name,
 		&user.Email,
 		&user.Role,
+		&user.CreatedAt,
+		&user.UpdatedAt,
 	); err != nil {
 		return nil, err
 	}
@@ -63,6 +66,57 @@ func (u *UserRepo) Get(ctx context.Context, email string) (*models.User, error) 
 			return nil, Error.ErrUserNotFound
 		}
 		return nil, fmt.Errorf("get user: %w", err)
+	}
+
+	return &user, nil
+}
+
+func (u *UserRepo) Update(ctx context.Context, id, name, password string) (*models.User, error) {
+	ctx, cancel := context.WithTimeout(ctx, 100*time.Millisecond)
+	defer cancel()
+
+	setClauses := []string{}
+	args := []interface{}{}
+	argPos := 1
+
+	if name != "" {
+		setClauses = append(setClauses, fmt.Sprintf("name = $%d", argPos))
+		args = append(args, name)
+		argPos++
+	}
+
+	if password != "" {
+		setClauses = append(setClauses, fmt.Sprintf("password = $%d", argPos))
+		args = append(args, password)
+		argPos++
+	}
+
+	setClauses = append(setClauses, "updated_at = now()")
+
+	query := fmt.Sprintf(`
+		UPDATE blogs
+		SET %s
+		WHERE id = $%d 		
+		RETURNING *; 
+	`, strings.Join(setClauses, ", "), argPos, argPos+1)
+
+	args = append(args, id)
+
+	var user models.User
+	err := u.repo.pool.QueryRow(ctx, query, args...).Scan(
+		&user.Id,
+		&user.Name,
+		&user.Email,
+		&user.Role,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	)
+
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, Error.ErrUserNotFound
+		}
+		return nil, fmt.Errorf("update user: %w", err)
 	}
 
 	return &user, nil

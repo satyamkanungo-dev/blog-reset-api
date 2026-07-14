@@ -19,6 +19,7 @@ type IBlogRepository interface {
 type IUserRepsoitory interface {
 	Create(ctx context.Context, name, email, password, role string) (*models.User, error)
 	Get(ctx context.Context, email string) (*models.User, error)
+	Update(ctx context.Context, name, password string) (*models.User, error)
 }
 
 type Repository struct {
