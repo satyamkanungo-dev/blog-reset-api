@@ -7,25 +7,19 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/satyamkanungo-dev/blog-rest-api/internal/Error"
 	models "github.com/satyamkanungo-dev/blog-rest-api/internal/models/core"
 )
 
-type IUserRepsoitory interface {
-	CreateUser(ctx context.Context, name, email, password, role string) (*models.User, error)
-	GetUser(ctx context.Context, email string) (*models.User, error)
-}
-
 type UserRepo struct {
-	Db *pgxpool.Pool
+	repo *Repository
 }
 
-func NewUserRepository(db *pgxpool.Pool) *UserRepo {
-	return &UserRepo{Db: db}
+func NewUserRepository(db *Repository) *UserRepo {
+	return &UserRepo{repo: db}
 }
 
-func (u *UserRepo) CreateUser(ctx context.Context, name, email, password, role string) (*models.User, error) {
+func (u *UserRepo) Create(ctx context.Context, name, email, password, role string) (*models.User, error) {
 	ctx, cancel := context.WithTimeout(ctx, 100*time.Millisecond)
 	defer cancel()
 
@@ -36,7 +30,7 @@ func (u *UserRepo) CreateUser(ctx context.Context, name, email, password, role s
 		RETURNING id,name,email,role;
 	`
 
-	if err := u.Db.QueryRow(ctx, query, name, email, password, role).Scan(
+	if err := u.repo.pool.QueryRow(ctx, query, name, email, password, role).Scan(
 		&user.Id,
 		&user.Name,
 		&user.Email,
@@ -48,7 +42,7 @@ func (u *UserRepo) CreateUser(ctx context.Context, name, email, password, role s
 	return &user, nil
 }
 
-func (u *UserRepo) GetUser(ctx context.Context, email string) (*models.User, error) {
+func (u *UserRepo) Get(ctx context.Context, email string) (*models.User, error) {
 	ctx, cancel := context.WithTimeout(ctx, 100*time.Millisecond)
 	defer cancel()
 
@@ -57,7 +51,7 @@ func (u *UserRepo) GetUser(ctx context.Context, email string) (*models.User, err
 		WHERE email = $1
 	`
 	var user models.User
-	err := u.Db.QueryRow(ctx, query, email).Scan(
+	err := u.repo.pool.QueryRow(ctx, query, email).Scan(
 		&user.Id,
 		&user.Name,
 		&user.Password,

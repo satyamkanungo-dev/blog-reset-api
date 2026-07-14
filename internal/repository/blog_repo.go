@@ -8,26 +8,16 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/satyamkanungo-dev/blog-rest-api/internal/Error"
 	models "github.com/satyamkanungo-dev/blog-rest-api/internal/models/core"
 )
 
-type IBlogRepository interface {
-	Create(ctx context.Context, userId, title, content, category string, tags ...string) (*models.Blog, error)
-	Get(ctx context.Context, id, userId string) (*models.Blog, error)
-	GetAll(ctx context.Context, limit int, cursor, userId string) (*models.Blog, error)
-	Update(ctx context.Context, id, userId, title, content, category string, tags ...string) error
-	Delete(ctx context.Context, id, userId string) (*models.Blog, error)
-	DeleteMultiple(ctx context.Context, userId string, ids ...string) (*models.Blog, error)
-}
-
 type BlogRepo struct {
-	DB *pgxpool.Pool
+	repo *Repository
 }
 
-func NewBlogRepository(db *pgxpool.Pool) *BlogRepo {
-	return &BlogRepo{DB: db}
+func NewBlogRepository(db *Repository) *BlogRepo {
+	return &BlogRepo{repo: db}
 }
 
 func (b *BlogRepo) Create(ctx context.Context, userId, title, content, category string, tags ...string) (*models.Blog, error) {
@@ -41,7 +31,7 @@ func (b *BlogRepo) Create(ctx context.Context, userId, title, content, category 
 		RETURNING *;
 	`
 
-	if err := b.DB.QueryRow(ctx, query, userId, title, content, category, tags).Scan(
+	if err := b.repo.pool.QueryRow(ctx, query, userId, title, content, category, tags).Scan(
 		&blog.Id,
 		&blog.UserId,
 		&blog.Title,
@@ -67,7 +57,7 @@ func (b *BlogRepo) Get(ctx context.Context, id, userId string) (*models.Blog, er
 		WHERE id = $1 AND user_id = $2;
 	`
 
-	err := b.DB.QueryRow(ctx, query, id, userId).Scan(
+	err := b.repo.pool.QueryRow(ctx, query, id, userId).Scan(
 		&blog.Id,
 		&blog.UserId,
 		&blog.Title,
@@ -123,7 +113,7 @@ func (b *BlogRepo) GetAll(ctx context.Context, limit int, cursor, userId string)
 func (b *BlogRepo) queryBlogs(ctx context.Context, query string, args ...interface{}) ([]models.Blog, error) {
 	blogs := make([]models.Blog, 0)
 
-	rows, err := b.DB.Query(ctx, query, args...)
+	rows, err := b.repo.pool.Query(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -197,7 +187,7 @@ func (b *BlogRepo) Update(ctx context.Context, id, userId, title, content, categ
 	args = append(args, id, userId)
 
 	var blog models.Blog
-	err := b.DB.QueryRow(ctx, query, args...).Scan(
+	err := b.repo.pool.QueryRow(ctx, query, args...).Scan(
 		&blog.Id,
 		&blog.UserId,
 		&blog.Title,
@@ -227,7 +217,7 @@ func (b *BlogRepo) Delete(ctx context.Context, id, userId string) error {
 		WHERE id = $1 AND user_id = $2;
 	`
 
-	commandTag, err := b.DB.Exec(ctx, query, id, userId)
+	commandTag, err := b.repo.pool.Exec(ctx, query, id, userId)
 	if err != nil {
 		return err
 	}
@@ -253,7 +243,7 @@ func (b *BlogRepo) DeleteMultiple(ctx context.Context, userId string, ids ...str
 }
 
 func (b *BlogRepo) scanIDs(ctx context.Context, query string, args ...any) ([]string, error) {
-	rows, err := b.DB.Query(ctx, query, args...)
+	rows, err := b.repo.pool.Query(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
