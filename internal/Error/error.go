@@ -11,4 +11,5 @@ var (
 	ErrPasswordTooShort    = errors.New("password must be at least 8 characters")
 	ErrInvalidEmail        = errors.New("invalid email format")
 	ErrEmailAlreadyExists  = errors.New("email already registered")
+	ErrMissingIdentifiers  = errors.New("blog and user id are required")
 )
