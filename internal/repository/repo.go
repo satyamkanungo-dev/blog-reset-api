@@ -11,7 +11,7 @@ type IBlogRepository interface {
 	Create(ctx context.Context, userId, title, content, category string, tags ...string) (*models.Blog, error)
 	Get(ctx context.Context, id, userId string) (*models.Blog, error)
 	GetAll(ctx context.Context, limit int, cursor, userId string) ([]models.Blog, error)
-	Update(ctx context.Context, id, userId, title, content, category string, tags ...string) error
+	Update(ctx context.Context, id, userId, title, content, category string, tags ...string) (*models.Blog, error)
 	Delete(ctx context.Context, id, userId string) error
 	DeleteMultiple(ctx context.Context, userId string, ids ...string) ([]string, error)
 }
@@ -19,7 +19,7 @@ type IBlogRepository interface {
 type IUserRepsoitory interface {
 	Create(ctx context.Context, name, email, password, role string) (*models.User, error)
 	Get(ctx context.Context, email string) (*models.User, error)
-	Update(ctx context.Context, name, password string) (*models.User, error)
+	Update(ctx context.Context, userId, name, password string) (*models.User, error)
 }
 
 type Repository struct {

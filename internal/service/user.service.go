@@ -15,10 +15,10 @@ var (
 )
 
 type UserService struct {
-	userRepository *repository.UserRepo
+	userRepository repository.IUserRepsoitory
 }
 
-func NewUserService(ur *repository.UserRepo) *UserService {
+func NewUserService(ur repository.IUserRepsoitory) *UserService {
 	return &UserService{userRepository: ur}
 }
 

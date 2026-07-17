@@ -11,10 +11,10 @@ import (
 )
 
 type BlogService struct {
-	blogRepository *repository.BlogRepo
+	blogRepository repository.IBlogRepository
 }
 
-func NewBlogService(br *repository.BlogRepo) *BlogService {
+func NewBlogService(br repository.IBlogRepository) *BlogService {
 	return &BlogService{blogRepository: br}
 }
 
