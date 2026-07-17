@@ -22,13 +22,11 @@ func NewUserService(ur *repository.UserRepo) *UserService {
 	return &UserService{userRepository: ur}
 }
 
-func (us *UserService) Create(rr *apirequest.RegisterRequest) (*models.User, error) {
+func (us *UserService) Create(rr *apirequest.RegisterRequest, role string) (*models.User, error) {
 	// validate the values
 	if rr.Email == "" || rr.Password == "" || rr.Name == "" {
 		return nil, Error.ErrAllFieldRequired
 	}
-
-	role := "user"
 
 	user, err := us.userRepository.Create(context.Background(), rr.Name, rr.Email, rr.Password, role)
 	if err != nil {

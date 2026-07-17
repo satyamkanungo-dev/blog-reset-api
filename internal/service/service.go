@@ -7,7 +7,7 @@ import (
 )
 
 type IUserService interface {
-	Create(rr *apirequest.RegisterRequest) (*models.User, error)
+	Create(rr *apirequest.RegisterRequest, role string) (*models.User, error)
 	Update(ur *apirequest.UpdateUserRequest, userId string) (*models.User, error)
 	Get(lr *apirequest.LoginRequest) (*models.User, error)
 }
