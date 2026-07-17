@@ -37,13 +37,8 @@ type BulkDeleteSummary struct {
 	Failed  int `json:"failed"`
 }
 
-type BulkDeleteFailed struct {
-	Id     string `json:"id"`
-	Reason string `json:"reason"`
-}
-
 type BulkDeleteResponse struct {
-	Succeeded []string           `json:"succeeded"`
-	Failed    []BulkDeleteFailed `json:"failed"`
-	Summary   BulkDeleteSummary  `json:"summary"`
+	Succeeded []string          `json:"succeeded"`
+	Failed    []string          `json:"failed"`
+	Summary   BulkDeleteSummary `json:"summary"`
 }
