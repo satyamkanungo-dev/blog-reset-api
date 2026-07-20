@@ -28,6 +28,10 @@ func (us *UserService) Create(rr *apirequest.RegisterRequest, role string) (*mod
 		return nil, Error.ErrAllFieldRequired
 	}
 
+	if len(rr.Password) >= passwordLength {
+		return nil, Error.ErrPasswordTooShort
+	}
+
 	// check the email already register
 	if existingUser, err := us.userRepository.Get(context.Background(), rr.Email); err == nil && existingUser != nil {
 		return nil, Error.ErrEmailAlreadyExists
@@ -81,6 +85,10 @@ func (us *UserService) Update(ur *apirequest.UpdateUserRequest, userId string) (
 	// validate the values
 	if ur.Name == "" && ur.Password == "" {
 		return nil, Error.ErrAllFieldRequired
+	}
+
+	if ur.Name == "" || len(ur.Password) >= passwordLength {
+		return nil, Error.ErrPasswordTooShort
 	}
 
 	user, err := us.userRepository.Update(context.Background(), userId, ur.Name, ur.Password)
