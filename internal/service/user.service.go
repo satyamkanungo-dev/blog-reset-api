@@ -28,6 +28,11 @@ func (us *UserService) Create(rr *apirequest.RegisterRequest, role string) (*mod
 		return nil, Error.ErrAllFieldRequired
 	}
 
+	// check the email already register
+	if existingUser, err := us.userRepository.Get(context.Background(), rr.Email); err == nil && existingUser != nil {
+		return nil, Error.ErrEmailAlreadyExists
+	}
+
 	// generate hashpassword
 	hassPassword, err := bcrypt.GenerateFromPassword([]byte(rr.Password), bcrypt.DefaultCost)
 	if err != nil {
