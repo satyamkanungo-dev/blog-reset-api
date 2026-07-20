@@ -28,7 +28,13 @@ func (us *UserService) Create(rr *apirequest.RegisterRequest, role string) (*mod
 		return nil, Error.ErrAllFieldRequired
 	}
 
-	user, err := us.userRepository.Create(context.Background(), rr.Name, rr.Email, rr.Password, role)
+	// generate hashpassword
+	hassPassword, err := bcrypt.GenerateFromPassword([]byte(rr.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := us.userRepository.Create(context.Background(), rr.Name, rr.Email, string(hassPassword), role)
 	if err != nil {
 		return nil, err
 	}
