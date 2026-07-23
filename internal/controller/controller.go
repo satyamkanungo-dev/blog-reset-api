@@ -7,3 +7,12 @@ type IUserController interface {
 	Update(ctx *gin.Context)
 	Get(ctx *gin.Context)
 }
+
+type IBlogController interface {
+	Create(ctx *gin.Context)
+	Update(ctx *gin.Context)
+	Get(ctx *gin.Context)
+	Delete(ctx *gin.Context)
+	GetAll(ctx *gin.Context)
+	DeleteMultiple(ctx *gin.Context)
+}
