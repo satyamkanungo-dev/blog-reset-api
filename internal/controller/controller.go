@@ -16,3 +16,7 @@ type IBlogController interface {
 	GetAll(ctx *gin.Context)
 	DeleteMultiple(ctx *gin.Context)
 }
+
+type IController interface {
+	RegisterRoutes(r *gin.Engine)
+}
