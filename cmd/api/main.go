@@ -10,8 +10,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/satyamkanungo-dev/blog-rest-api/internal/config"
+	"github.com/satyamkanungo-dev/blog-rest-api/internal/controller"
 	"github.com/satyamkanungo-dev/blog-rest-api/internal/database"
+	"github.com/satyamkanungo-dev/blog-rest-api/internal/repository"
 	"github.com/satyamkanungo-dev/blog-rest-api/internal/server"
+	"github.com/satyamkanungo-dev/blog-rest-api/internal/service"
 )
 
 func main() {
@@ -32,13 +35,33 @@ func main() {
 
 	defer pool.Close()
 
-	// eg:
+	// repositories
+	db := repository.NewRepository(pool)
+	userRepo := repository.NewUserRepository(db)
+	blogRepo := repository.NewBlogRepository(db)
+
+	// services
+	userServices := service.NewUserService(userRepo)
+	blogServices := service.NewBlogService(blogRepo)
+
+	// controllers
+	userController := controller.NewUserController(userServices)
+	blogController := controller.NewBlogController(blogServices)
+
+	mainController := controller.NewMainController(userController, blogController)
+
+	// router
 	router := gin.Default()
-	router.GET("api/v1", func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, gin.H{
-			"message": "Blog API 👍",
+	v1 := router.Group("api/v1")
+	{
+		router.GET("", func(ctx *gin.Context) {
+			ctx.JSON(http.StatusOK, gin.H{
+				"message": "Blog API 👍",
+			})
 		})
-	})
+
+		mainController.RegisterRoutes(v1)
+	}
 
 	workDone := make(chan os.Signal, 1)
 
