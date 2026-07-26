@@ -23,6 +23,15 @@ func NewUserController(service service.IUserService) *UserController {
 	return &UserController{UserService: service}
 }
 
+func (uc *UserController) RegisterRequest(r *gin.Engine) {
+	users := r.Group("/users")
+	{
+		users.POST("/register", uc.Create)
+		users.GET("/login", uc.Get)
+		users.PUT("", uc.Update)
+	}
+}
+
 func (uc *UserController) Create(ctx *gin.Context) {
 	var input apirequest.RegisterRequest
 	if err := ctx.BindJSON(&input); err != nil {
