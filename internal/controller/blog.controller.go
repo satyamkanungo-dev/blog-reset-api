@@ -19,6 +19,18 @@ func NewBlogController(service service.IBlogService) *BlogController {
 	return &BlogController{BlogService: service}
 }
 
+func (bc *BlogController) RegisterRoutes(r *gin.Engine) {
+	blogs := r.Group("/blogs")
+	{
+		blogs.POST("", bc.Create)
+		blogs.GET("", bc.GetAll)
+		blogs.DELETE("", bc.DeleteMultiple)
+		blogs.GET("/:id", bc.Get)
+		blogs.PUT("/:id", bc.Update)
+		blogs.DELETE("/:id", bc.Delete)
+	}
+}
+
 func (bc *BlogController) Create(ctx *gin.Context) {
 	var input apirequest.BlogRequest
 	if err := ctx.BindJSON(&input); err != nil {
