@@ -12,7 +12,7 @@ func NewMainController(controllers ...IController) *MainController {
 	}
 }
 
-func (mc *MainController) RegisterRoutes(r *gin.Engine) {
+func (mc *MainController) RegisterRoutes(r gin.IRouter) {
 	for _, c := range mc.controllers {
 		c.RegisterRoutes(r)
 	}

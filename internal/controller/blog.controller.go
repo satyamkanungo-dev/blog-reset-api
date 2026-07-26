@@ -19,7 +19,7 @@ func NewBlogController(service service.IBlogService) *BlogController {
 	return &BlogController{BlogService: service}
 }
 
-func (bc *BlogController) RegisterRoutes(r *gin.Engine) {
+func (bc *BlogController) RegisterRoutes(r gin.IRouter) {
 	blogs := r.Group("/blogs")
 	{
 		blogs.POST("", bc.Create)
