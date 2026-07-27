@@ -1,6 +1,8 @@
 package service
 
 import (
+	"time"
+
 	apirequest "github.com/satyamkanungo-dev/blog-rest-api/internal/models/api_request"
 	apiresponse "github.com/satyamkanungo-dev/blog-rest-api/internal/models/api_response"
 	models "github.com/satyamkanungo-dev/blog-rest-api/internal/models/core"
@@ -19,4 +21,9 @@ type IBlogService interface {
 	Delete(id, userId string) error
 	GetAll(userId, cursor string) (*apiresponse.BlogsResponse, error)
 	DeleteMultiple(db *apirequest.DeleteBlogRequest, userId string) (*apiresponse.BulkDeleteResponse, error)
+}
+
+type IAuthService interface {
+	GetToken(exp time.Time, userId string) (string, error)
+	ValidateToken(tokenStr string) (string, error)
 }
