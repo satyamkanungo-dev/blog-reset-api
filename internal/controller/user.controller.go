@@ -2,10 +2,12 @@ package controller
 
 import (
 	"errors"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/satyamkanungo-dev/blog-rest-api/internal/Error"
+	"github.com/satyamkanungo-dev/blog-rest-api/internal/auth"
 	apirequest "github.com/satyamkanungo-dev/blog-rest-api/internal/models/api_request"
 	apiresponse "github.com/satyamkanungo-dev/blog-rest-api/internal/models/api_response"
 	"github.com/satyamkanungo-dev/blog-rest-api/internal/service"
@@ -17,10 +19,11 @@ var (
 
 type UserController struct {
 	UserService service.IUserService
+	AuthService service.IAuthService
 }
 
-func NewUserController(service service.IUserService) *UserController {
-	return &UserController{UserService: service}
+func NewUserController(userservice service.IUserService, authservice service.IAuthService) *UserController {
+	return &UserController{UserService: userservice, AuthService: authservice}
 }
 
 func (uc *UserController) RegisterRoutes(r gin.IRouter) {
@@ -71,10 +74,43 @@ func (uc *UserController) Create(ctx *gin.Context) {
 		return
 	}
 
+	// access token
+	accessToken, err := uc.AuthService.GetToken(auth.AccessTokenExp, user.Id)
+	if err != nil {
+		log.Println("from accessToken")
+		ctx.JSON(http.StatusInternalServerError, apiresponse.APIResponse{
+			Code:    http.StatusInternalServerError,
+			Status:  "error",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	// refresh token
+	refreshToken, err := uc.AuthService.GetToken(auth.RefreshTokenExp, user.Id)
+	if err != nil {
+		log.Println("from refreshToken")
+		ctx.JSON(http.StatusInternalServerError, apiresponse.APIResponse{
+			Code:    http.StatusInternalServerError,
+			Status:  "error",
+			Message: err.Error(),
+		})
+		return
+	}
+
 	ctx.JSON(http.StatusCreated, apiresponse.APIResponse{
 		Code:   http.StatusCreated,
 		Status: "success",
-		Data:   user,
+		Data: apiresponse.AuthResponse{
+			AccessToken:  accessToken,
+			RefreshToken: refreshToken,
+			User: apiresponse.UserResponse{
+				Id:       user.Id,
+				UserName: user.Name,
+				Email:    user.Email,
+				Role:     user.Role,
+			},
+		},
 	})
 }
 
@@ -109,10 +145,44 @@ func (uc *UserController) Get(ctx *gin.Context) {
 
 	}
 
+	// access token
+	accessToken, err := uc.AuthService.GetToken(auth.AccessTokenExp, user.Id)
+	if err != nil {
+		log.Println("from accessToken")
+
+		ctx.JSON(http.StatusInternalServerError, apiresponse.APIResponse{
+			Code:    http.StatusInternalServerError,
+			Status:  "error",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	// refresh token
+	refreshToken, err := uc.AuthService.GetToken(auth.RefreshTokenExp, user.Id)
+	if err != nil {
+		log.Println("from refreshToken")
+		ctx.JSON(http.StatusInternalServerError, apiresponse.APIResponse{
+			Code:    http.StatusInternalServerError,
+			Status:  "error",
+			Message: err.Error(),
+		})
+		return
+	}
+
 	ctx.JSON(http.StatusOK, apiresponse.APIResponse{
 		Code:   http.StatusOK,
 		Status: "success",
-		Data:   user,
+		Data: apiresponse.AuthResponse{
+			AccessToken:  accessToken,
+			RefreshToken: refreshToken,
+			User: apiresponse.UserResponse{
+				Id:       user.Id,
+				UserName: user.Name,
+				Email:    user.Email,
+				Role:     user.Role,
+			},
+		},
 	})
 }
 
