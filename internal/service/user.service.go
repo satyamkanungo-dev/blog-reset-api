@@ -28,7 +28,7 @@ func (us *UserService) Create(rr *apirequest.RegisterRequest, role string) (*mod
 		return nil, Error.ErrAllFieldRequired
 	}
 
-	if len(rr.Password) >= passwordLength {
+	if len(rr.Password) < passwordLength {
 		return nil, Error.ErrPasswordTooShort
 	}
 
@@ -57,7 +57,7 @@ func (us *UserService) Get(lr *apirequest.LoginRequest) (*models.User, error) {
 		return nil, Error.ErrAllFieldRequired
 	}
 
-	if len(lr.Password) >= passwordLength {
+	if len(lr.Password) < passwordLength {
 		return nil, Error.ErrPasswordTooShort
 	}
 
