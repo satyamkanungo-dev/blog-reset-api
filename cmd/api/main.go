@@ -43,9 +43,10 @@ func main() {
 	// services
 	userServices := service.NewUserService(userRepo)
 	blogServices := service.NewBlogService(blogRepo)
+	authServices := service.NewAuthService(cfg.Secret)
 
 	// controllers
-	userController := controller.NewUserController(userServices)
+	userController := controller.NewUserController(userServices, authServices)
 	blogController := controller.NewBlogController(blogServices)
 
 	mainController := controller.NewMainController(userController, blogController)
