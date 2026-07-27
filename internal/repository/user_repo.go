@@ -50,13 +50,14 @@ func (u *UserRepo) Get(ctx context.Context, email string) (*models.User, error) 
 	defer cancel()
 
 	query := `
-		SELECT id,name,password,role FROM users
+		SELECT id,name,email,password,role FROM users
 		WHERE email = $1
 	`
 	var user models.User
 	err := u.repo.pool.QueryRow(ctx, query, email).Scan(
 		&user.Id,
 		&user.Name,
+		&user.Email,
 		&user.Password,
 		&user.Role,
 	)
