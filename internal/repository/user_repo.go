@@ -36,8 +36,6 @@ func (u *UserRepo) Create(ctx context.Context, name, email, password, role strin
 		&user.Name,
 		&user.Email,
 		&user.Role,
-		&user.CreatedAt,
-		&user.UpdatedAt,
 	); err != nil {
 		return nil, err
 	}
