@@ -14,4 +14,5 @@ var (
 	ErrMissingIdentifiers  = errors.New("blog and user id are required")
 	ErrInvalidToken        = errors.New("invalid token")
 	ErrTokenExpire         = errors.New("token has expired")
+	ErrAuthorizationToken  = errors.New("missing authorization token")
 )

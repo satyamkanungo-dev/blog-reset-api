@@ -26,8 +26,8 @@ func NewUserController(userservice service.IUserService, authservice service.IAu
 	return &UserController{UserService: userservice, AuthService: authservice}
 }
 
-func (uc *UserController) RegisterRoutes(r gin.IRouter) {
-	users := r.Group("/users")
+func (uc *UserController) RegisterRoutes(r gin.IRouter, authMiddleware gin.HandlerFunc) {
+	users := r.Group("/users").Use(authMiddleware)
 	{
 		users.POST("/register", uc.Create)
 		users.GET("/login", uc.Get)
@@ -197,9 +197,7 @@ func (uc *UserController) Update(ctx *gin.Context) {
 		return
 	}
 
-	// TODO: needed work
-	// demo
-	var userId string
+	userId, _ := getUserIdFromMiddleware(ctx)
 
 	user, err := uc.UserService.Update(&input, userId)
 	if err != nil {

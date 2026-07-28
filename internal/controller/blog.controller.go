@@ -19,8 +19,8 @@ func NewBlogController(service service.IBlogService) *BlogController {
 	return &BlogController{BlogService: service}
 }
 
-func (bc *BlogController) RegisterRoutes(r gin.IRouter) {
-	blogs := r.Group("/blogs")
+func (bc *BlogController) RegisterRoutes(r gin.IRouter, authMiddlware gin.HandlerFunc) {
+	blogs := r.Group("/blogs").Use(authMiddlware)
 	{
 		blogs.POST("", bc.Create)
 		blogs.GET("", bc.GetAll)
@@ -42,8 +42,7 @@ func (bc *BlogController) Create(ctx *gin.Context) {
 		return
 	}
 
-	// TODO: work todo
-	var userId string
+	userId, _ := getUserIdFromMiddleware(ctx)
 
 	blog, err := bc.BlogService.Create(&input, userId)
 	if err != nil {
@@ -70,9 +69,7 @@ func (bc *BlogController) Create(ctx *gin.Context) {
 }
 
 func (bc *BlogController) Get(ctx *gin.Context) {
-	// TODO:
-	// get a user from middleware
-	var userId string
+	userId, _ := getUserIdFromMiddleware(ctx)
 
 	id := ctx.Param("id")
 
@@ -112,7 +109,7 @@ func (bc *BlogController) Get(ctx *gin.Context) {
 }
 
 func (bc *BlogController) GetAll(ctx *gin.Context) {
-	var userId string
+	userId, _ := getUserIdFromMiddleware(ctx)
 	cursor := ctx.Query("cursor")
 
 	blogs, err := bc.BlogService.GetAll(userId, cursor)
@@ -152,7 +149,7 @@ func (bc *BlogController) Update(ctx *gin.Context) {
 		return
 	}
 
-	var userId string
+	userId, _ := getUserIdFromMiddleware(ctx)
 
 	id := ctx.Param("id")
 
@@ -192,7 +189,7 @@ func (bc *BlogController) Update(ctx *gin.Context) {
 }
 
 func (bc *BlogController) Delete(ctx *gin.Context) {
-	var userId string
+	userId, _ := getUserIdFromMiddleware(ctx)
 
 	id := ctx.Param("id")
 
@@ -233,7 +230,7 @@ func (bc *BlogController) DeleteMultiple(ctx *gin.Context) {
 		return
 	}
 
-	var userId string
+	userId, _ := getUserIdFromMiddleware(ctx)
 
 	deletedblogIds, err := bc.BlogService.DeleteMultiple(&input, userId)
 	if err != nil {

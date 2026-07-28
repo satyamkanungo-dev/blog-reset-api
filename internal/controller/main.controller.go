@@ -12,8 +12,8 @@ func NewMainController(controllers ...IController) *MainController {
 	}
 }
 
-func (mc *MainController) RegisterRoutes(r gin.IRouter) {
+func (mc *MainController) RegisterRoutes(r gin.IRouter, authMiddleware gin.HandlerFunc) {
 	for _, c := range mc.controllers {
-		c.RegisterRoutes(r)
+		c.RegisterRoutes(r, authMiddleware)
 	}
 }
