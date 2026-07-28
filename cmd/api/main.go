@@ -12,6 +12,7 @@ import (
 	"github.com/satyamkanungo-dev/blog-rest-api/internal/config"
 	"github.com/satyamkanungo-dev/blog-rest-api/internal/controller"
 	"github.com/satyamkanungo-dev/blog-rest-api/internal/database"
+	"github.com/satyamkanungo-dev/blog-rest-api/internal/middleware"
 	"github.com/satyamkanungo-dev/blog-rest-api/internal/repository"
 	"github.com/satyamkanungo-dev/blog-rest-api/internal/server"
 	"github.com/satyamkanungo-dev/blog-rest-api/internal/service"
@@ -48,8 +49,10 @@ func main() {
 	// controllers
 	userController := controller.NewUserController(userServices, authServices)
 	blogController := controller.NewBlogController(blogServices)
-
 	mainController := controller.NewMainController(userController, blogController)
+
+	// middleware
+	authMiddleware := middleware.AuthMiddleware(authServices)
 
 	// router
 	router := gin.Default()
@@ -61,7 +64,7 @@ func main() {
 			})
 		})
 
-		mainController.RegisterRoutes(v1)
+		mainController.RegisterRoutes(v1, authMiddleware)
 	}
 
 	workDone := make(chan os.Signal, 1)
