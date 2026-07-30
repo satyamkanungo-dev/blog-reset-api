@@ -19,14 +19,13 @@ type UserResponse struct {
 }
 
 type AuthResponse struct {
-	AccessToken  string       `json:"access_token"`
-	RefreshToken string       `json:"refresh_token"`
-	User         UserResponse `json:"user"`
+	RefreshResponse
+	User UserResponse `json:"user"`
 }
 
 // blog
 type BlogsResponse struct {
-	Data       []models.Blog `json:"data"`
+	Data       []models.Blog `json:"blogs"`
 	NextCursor any           `json:"next_cursor"`
 	HasNext    bool          `json:"has_next"`
 }
