@@ -26,7 +26,7 @@ func (b *BlogRepo) Create(ctx context.Context, userId, title, content, category 
 
 	var blog models.Blog
 	query := `
-		INSERT INTO  blogs (userId, title, context, category,tags)
+		INSERT INTO  blogs (user_id, title, content, category,tags)
 		VALUES ($1,$2,$3,$4,$5)
 		RETURNING *;
 	`
