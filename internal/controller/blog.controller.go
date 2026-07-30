@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/satyamkanungo-dev/blog-rest-api/internal/Error"
+	"github.com/satyamkanungo-dev/blog-rest-api/internal/middleware"
 	apirequest "github.com/satyamkanungo-dev/blog-rest-api/internal/models/api_request"
 	apiresponse "github.com/satyamkanungo-dev/blog-rest-api/internal/models/api_response"
 	"github.com/satyamkanungo-dev/blog-rest-api/internal/service"
@@ -19,8 +20,8 @@ func NewBlogController(service service.IBlogService) *BlogController {
 	return &BlogController{BlogService: service}
 }
 
-func (bc *BlogController) RegisterRoutes(r gin.IRouter, authMiddlware gin.HandlerFunc) {
-	blogs := r.Group("/blogs").Use(authMiddlware)
+func (bc *BlogController) RegisterRoutes(r gin.IRouter, middleware middleware.IAuthMiddleware) {
+	blogs := r.Group("/blogs").Use(middleware.AccessMiddleware())
 	{
 		blogs.POST("", bc.Create)
 		blogs.GET("", bc.GetAll)
@@ -52,6 +53,7 @@ func (bc *BlogController) Create(ctx *gin.Context) {
 				Status:  "error",
 				Message: err.Error(),
 			})
+			return
 		}
 
 		ctx.JSON(http.StatusInternalServerError, apiresponse.APIResponse{
@@ -59,6 +61,7 @@ func (bc *BlogController) Create(ctx *gin.Context) {
 			Status:  "error",
 			Message: err.Error(),
 		})
+		return
 	}
 
 	ctx.JSON(http.StatusCreated, apiresponse.APIResponse{

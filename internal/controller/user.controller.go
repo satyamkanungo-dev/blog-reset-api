@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/satyamkanungo-dev/blog-rest-api/internal/Error"
 	"github.com/satyamkanungo-dev/blog-rest-api/internal/auth"
+	"github.com/satyamkanungo-dev/blog-rest-api/internal/middleware"
 	apirequest "github.com/satyamkanungo-dev/blog-rest-api/internal/models/api_request"
 	apiresponse "github.com/satyamkanungo-dev/blog-rest-api/internal/models/api_response"
 	"github.com/satyamkanungo-dev/blog-rest-api/internal/service"
@@ -26,12 +27,12 @@ func NewUserController(userservice service.IUserService, authservice service.IAu
 	return &UserController{UserService: userservice, AuthService: authservice}
 }
 
-func (uc *UserController) RegisterRoutes(r gin.IRouter, authMiddleware gin.HandlerFunc) {
-	users := r.Group("/users").Use(authMiddleware)
+func (uc *UserController) RegisterRoutes(r gin.IRouter, middleware middleware.IAuthMiddleware) {
+	users := r.Group("/users")
 	{
 		users.POST("/register", uc.Create)
-		users.GET("/login", uc.Get)
-		users.PUT("", uc.Update)
+		users.POST("/login", uc.Get)
+		users.PUT("", middleware.AccessMiddleware(), uc.Update)
 	}
 }
 
@@ -77,7 +78,6 @@ func (uc *UserController) Create(ctx *gin.Context) {
 	// access token
 	accessToken, err := uc.AuthService.GetToken(auth.AccessTokenExp, user.Id)
 	if err != nil {
-		log.Println("from accessToken")
 		ctx.JSON(http.StatusInternalServerError, apiresponse.APIResponse{
 			Code:    http.StatusInternalServerError,
 			Status:  "error",
@@ -89,7 +89,6 @@ func (uc *UserController) Create(ctx *gin.Context) {
 	// refresh token
 	refreshToken, err := uc.AuthService.GetToken(auth.RefreshTokenExp, user.Id)
 	if err != nil {
-		log.Println("from refreshToken")
 		ctx.JSON(http.StatusInternalServerError, apiresponse.APIResponse{
 			Code:    http.StatusInternalServerError,
 			Status:  "error",
@@ -102,8 +101,10 @@ func (uc *UserController) Create(ctx *gin.Context) {
 		Code:   http.StatusCreated,
 		Status: "success",
 		Data: apiresponse.AuthResponse{
-			AccessToken:  accessToken,
-			RefreshToken: refreshToken,
+			RefreshResponse: apiresponse.RefreshResponse{
+				AccessToken:  accessToken,
+				RefreshToken: refreshToken,
+			},
 			User: apiresponse.UserResponse{
 				Id:       user.Id,
 				UserName: user.Name,
@@ -174,8 +175,10 @@ func (uc *UserController) Get(ctx *gin.Context) {
 		Code:   http.StatusOK,
 		Status: "success",
 		Data: apiresponse.AuthResponse{
-			AccessToken:  accessToken,
-			RefreshToken: refreshToken,
+			RefreshResponse: apiresponse.RefreshResponse{
+				AccessToken:  accessToken,
+				RefreshToken: refreshToken,
+			},
 			User: apiresponse.UserResponse{
 				Id:       user.Id,
 				UserName: user.Name,

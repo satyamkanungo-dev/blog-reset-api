@@ -1,6 +1,9 @@
 package controller
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/satyamkanungo-dev/blog-rest-api/internal/middleware"
+)
 
 type IUserController interface {
 	Create(ctx *gin.Context)
@@ -18,5 +21,5 @@ type IBlogController interface {
 }
 
 type IController interface {
-	RegisterRoutes(r gin.IRouter, authMiddleware gin.HandlerFunc)
+	RegisterRoutes(r gin.IRouter, middleware middleware.IAuthMiddleware)
 }
