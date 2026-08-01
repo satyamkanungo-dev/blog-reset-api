@@ -2,7 +2,6 @@ package controller
 
 import (
 	"errors"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -137,6 +136,24 @@ func (uc *UserController) Get(ctx *gin.Context) {
 			return
 		}
 
+		if errors.Is(err, Error.ErrUserNotFound) {
+			ctx.JSON(http.StatusNotFound, apiresponse.APIResponse{
+				Code:    http.StatusNotFound,
+				Status:  "error",
+				Message: err.Error(),
+			})
+			return
+		}
+
+		if errors.Is(err, Error.ErrIncorrectPassword) {
+			ctx.JSON(http.StatusUnauthorized, apiresponse.APIResponse{
+				Code:    http.StatusUnauthorized,
+				Status:  "error",
+				Message: err.Error(),
+			})
+			return
+		}
+
 		ctx.JSON(http.StatusInternalServerError, apiresponse.APIResponse{
 			Code:    http.StatusInternalServerError,
 			Status:  "error",
@@ -149,8 +166,6 @@ func (uc *UserController) Get(ctx *gin.Context) {
 	// access token
 	accessToken, err := uc.AuthService.GetToken(auth.AccessTokenExp, user.Id)
 	if err != nil {
-		log.Println("from accessToken")
-
 		ctx.JSON(http.StatusInternalServerError, apiresponse.APIResponse{
 			Code:    http.StatusInternalServerError,
 			Status:  "error",
@@ -162,7 +177,6 @@ func (uc *UserController) Get(ctx *gin.Context) {
 	// refresh token
 	refreshToken, err := uc.AuthService.GetToken(auth.RefreshTokenExp, user.Id)
 	if err != nil {
-		log.Println("from refreshToken")
 		ctx.JSON(http.StatusInternalServerError, apiresponse.APIResponse{
 			Code:    http.StatusInternalServerError,
 			Status:  "error",
