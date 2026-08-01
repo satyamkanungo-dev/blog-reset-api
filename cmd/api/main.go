@@ -49,11 +49,10 @@ func main() {
 	// controllers
 	userController := controller.NewUserController(userServices, authServices)
 	blogController := controller.NewBlogController(blogServices)
-	authController := controller.NewAuthController(authServices)
-	mainController := controller.NewMainController(userController, blogController, authController)
+	mainController := controller.NewMainController(userController, blogController)
 
 	// middleware
-	authMiddleware := middleware.NewAuthMiddleware(authServices)
+	authMiddleware := middleware.NewMiddleware(authServices)
 
 	// router
 	router := gin.Default()

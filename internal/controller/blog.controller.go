@@ -21,7 +21,7 @@ func NewBlogController(service service.IBlogService) *BlogController {
 }
 
 func (bc *BlogController) RegisterRoutes(r gin.IRouter, middleware middleware.IAuthMiddleware) {
-	blogs := r.Group("/blogs").Use(middleware.AccessMiddleware())
+	blogs := r.Group("/blogs").Use(middleware.AuthMiddleware())
 	{
 		blogs.POST("", bc.Create)
 		blogs.GET("", bc.GetAll)

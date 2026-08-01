@@ -31,7 +31,8 @@ func (uc *UserController) RegisterRoutes(r gin.IRouter, middleware middleware.IA
 	{
 		users.POST("/register", uc.Create)
 		users.POST("/login", uc.Get)
-		users.PUT("", middleware.AccessMiddleware(), uc.Update)
+		users.POST("/refresh", middleware.AuthMiddleware(), uc.GetToken)
+		users.PUT("", middleware.AuthMiddleware(), uc.Update)
 	}
 }
 
@@ -248,5 +249,42 @@ func (uc *UserController) Update(ctx *gin.Context) {
 		Code:   http.StatusOK,
 		Status: "success",
 		Data:   user,
+	})
+}
+
+func (uc *UserController) GetToken(ctx *gin.Context) {
+	userId, _ := getUserIdFromMiddleware(ctx)
+
+	accessToken, err := uc.AuthService.GetToken(auth.AccessTokenExp, userId)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, apiresponse.APIResponse{
+			Code:    http.StatusInternalServerError,
+			Status:  "error",
+			Message: err.Error(),
+		})
+		return
+
+	}
+
+	refreshToken, err := uc.AuthService.GetToken(auth.RefreshTokenExp, userId)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, apiresponse.APIResponse{
+			Code:    http.StatusInternalServerError,
+			Status:  "error",
+			Message: err.Error(),
+		})
+		return
+
+	}
+
+	ctx.JSON(http.StatusOK, apiresponse.APIResponse{
+		Code:   http.StatusOK,
+		Status: "success",
+		Data: apiresponse.AuthResponse{
+			RefreshResponse: apiresponse.RefreshResponse{
+				AccessToken:  accessToken,
+				RefreshToken: refreshToken,
+			},
+		},
 	})
 }
