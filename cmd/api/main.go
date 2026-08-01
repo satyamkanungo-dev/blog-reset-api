@@ -9,6 +9,7 @@ import (
 	"syscall"
 
 	"github.com/gin-gonic/gin"
+	_ "github.com/satyamkanungo-dev/blog-rest-api/docs"
 	"github.com/satyamkanungo-dev/blog-rest-api/internal/config"
 	"github.com/satyamkanungo-dev/blog-rest-api/internal/controller"
 	"github.com/satyamkanungo-dev/blog-rest-api/internal/database"
@@ -16,8 +17,18 @@ import (
 	"github.com/satyamkanungo-dev/blog-rest-api/internal/repository"
 	"github.com/satyamkanungo-dev/blog-rest-api/internal/server"
 	"github.com/satyamkanungo-dev/blog-rest-api/internal/service"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
+// @title A Blog API
+// @description A Blog API in Golang using Gin framework
+// @host localhost:8000
+// @basePath /api/v1
+// @securityDefinitions.apiKey BearerAuth
+// @in                         header
+// @name                       Authorization
+// @description                Type 'Bearer <your_jwt_token>' to authenticate.
 func main() {
 	cfg, err := config.Load()
 	if err != nil {
@@ -56,6 +67,8 @@ func main() {
 
 	// router
 	router := gin.Default()
+
+	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	v1 := router.Group("api/v1")
 	{
 		router.GET("", func(ctx *gin.Context) {

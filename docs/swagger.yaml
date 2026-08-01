@@ -1,0 +1,578 @@
+basePath: /api/v1
+definitions:
+  apirequest.BlogRequest:
+    properties:
+      category:
+        type: string
+      content:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+    required:
+    - content
+    - title
+    type: object
+  apirequest.DeleteBlogRequest:
+    properties:
+      id:
+        items:
+          type: string
+        type: array
+    type: object
+  apirequest.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  apirequest.RegisterRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - name
+    - password
+    type: object
+  apirequest.UpdateUserRequest:
+    properties:
+      name:
+        type: string
+      password:
+        type: string
+    type: object
+  apiresponse.APIResponse:
+    properties:
+      code:
+        description: http status
+        type: integer
+      data: {}
+      message:
+        type: string
+      status:
+        description: success or error
+        type: string
+    type: object
+  apiresponse.AuthResponse:
+    properties:
+      accees_token:
+        type: string
+      refresh_token:
+        type: string
+      user:
+        $ref: '#/definitions/apiresponse.UserResponse'
+    type: object
+  apiresponse.BulkDeleteResponse:
+    properties:
+      failed:
+        items:
+          type: string
+        type: array
+      succeeded:
+        items:
+          type: string
+        type: array
+      summary:
+        $ref: '#/definitions/apiresponse.BulkDeleteSummary'
+    type: object
+  apiresponse.BulkDeleteSummary:
+    properties:
+      deleted:
+        type: integer
+      failed:
+        type: integer
+      total:
+        type: integer
+    type: object
+  apiresponse.UserResponse:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      role:
+        type: string
+      username:
+        type: string
+    type: object
+  models.Blog:
+    properties:
+      category:
+        type: string
+      content:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
+  models.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      role:
+        type: string
+      updated_at:
+        type: string
+    type: object
+host: localhost:8000
+info:
+  contact: {}
+  description: A Blog API in Golang using Gin framework
+  title: A Blog API
+paths:
+  /blogs:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes an array of blog IDs belonging to the authenticated user.
+        Returns lists of succeeded and failed deletions.
+      parameters:
+      - description: List of Todo IDs to delete
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/apirequest.DeleteBlogRequest'
+      produces:
+      - application/json
+      responses:
+        "207":
+          description: Multi-Status response indicating successful and failed deletions
+          schema:
+            allOf:
+            - $ref: '#/definitions/apiresponse.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/apiresponse.BulkDeleteResponse'
+              type: object
+        "400":
+          description: Invalid input, missing required fields
+          schema:
+            $ref: '#/definitions/apiresponse.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apiresponse.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apiresponse.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete multiple blogs
+      tags:
+      - blogs
+    get:
+      consumes:
+      - application/json
+      description: Get all blogs
+      parameters:
+      - description: Pagination cursor from the previous response
+        in: query
+        name: cursor
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/apiresponse.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Blog'
+              type: object
+        "400":
+          description: Invalid input, missing required fields
+          schema:
+            $ref: '#/definitions/apiresponse.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apiresponse.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apiresponse.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Get all blogs
+      tags:
+      - blogs
+    post:
+      consumes:
+      - application/json
+      description: Create a new blog
+      parameters:
+      - description: blog details
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/apirequest.BlogRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: blog created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/apiresponse.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Blog'
+              type: object
+        "400":
+          description: Invalid input, missing required fields
+          schema:
+            $ref: '#/definitions/apiresponse.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apiresponse.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apiresponse.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: a new blog
+      tags:
+      - blogs
+  /blogs/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a blog by id
+      parameters:
+      - description: blog id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Delete successfully
+          schema:
+            $ref: '#/definitions/apiresponse.APIResponse'
+        "400":
+          description: Invalid input, missing required fields
+          schema:
+            $ref: '#/definitions/apiresponse.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apiresponse.APIResponse'
+        "404":
+          description: blog not found
+          schema:
+            $ref: '#/definitions/apiresponse.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apiresponse.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete a blog
+      tags:
+      - blogs
+    get:
+      consumes:
+      - application/json
+      description: Get a blog by id
+      parameters:
+      - description: blog id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/apiresponse.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Blog'
+              type: object
+        "400":
+          description: Invalid input, missing required fields
+          schema:
+            $ref: '#/definitions/apiresponse.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apiresponse.APIResponse'
+        "404":
+          description: blog not found
+          schema:
+            $ref: '#/definitions/apiresponse.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apiresponse.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Get a blog
+      tags:
+      - blogs
+    put:
+      consumes:
+      - application/json
+      description: Get a updated user
+      parameters:
+      - description: Update user details
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/apirequest.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User details updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/apiresponse.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.User'
+              type: object
+        "400":
+          description: Invalid input, missing required fields, or password too short
+          schema:
+            $ref: '#/definitions/apiresponse.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apiresponse.APIResponse'
+        "404":
+          description: Invalid blog
+          schema:
+            $ref: '#/definitions/apiresponse.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apiresponse.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Update users details
+      tags:
+      - blogs
+  /users:
+    put:
+      consumes:
+      - application/json
+      description: Get a updated user
+      parameters:
+      - description: Update user details
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/apirequest.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User details updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/apiresponse.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.User'
+              type: object
+        "400":
+          description: Invalid input, missing required fields, or password too short
+          schema:
+            $ref: '#/definitions/apiresponse.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apiresponse.APIResponse'
+        "404":
+          description: Invalid user
+          schema:
+            $ref: '#/definitions/apiresponse.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apiresponse.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Update users details
+      tags:
+      - users
+  /users/login:
+    get:
+      consumes:
+      - application/json
+      description: Get a user along with access and refresh token
+      parameters:
+      - description: User login details
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/apirequest.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User login successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/apiresponse.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/apiresponse.AuthResponse'
+              type: object
+        "400":
+          description: Invalid input, missing required fields, or password too short
+          schema:
+            $ref: '#/definitions/apiresponse.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apiresponse.APIResponse'
+        "404":
+          description: Invalid user
+          schema:
+            $ref: '#/definitions/apiresponse.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apiresponse.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Login a user
+      tags:
+      - users
+  /users/refresh:
+    post:
+      description: Exchanges a valid refresh token for a new access token and a newly
+        generated refresh token. The refresh token must be provided in the Authorization
+        header as a Bearer token.
+      parameters:
+      - description: 'Refresh token, format: Bearer <refresh-token>'
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/apiresponse.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/apiresponse.AuthResponse'
+              type: object
+        "400":
+          description: Invalid input, missing required fields, or malformed token
+          schema:
+            $ref: '#/definitions/apiresponse.APIResponse'
+        "401":
+          description: Unauthorized, invalid or expired refresh token
+          schema:
+            $ref: '#/definitions/apiresponse.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apiresponse.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Get a new authentication tokens
+      tags:
+      - users
+  /users/register:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new user account and returns access and refresh tokens
+        along with user details
+      parameters:
+      - description: User registration details
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/apirequest.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/apiresponse.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/apiresponse.AuthResponse'
+              type: object
+        "400":
+          description: Invalid input, missing required fields, or password too short
+          schema:
+            $ref: '#/definitions/apiresponse.APIResponse'
+        "409":
+          description: Email already exists
+          schema:
+            $ref: '#/definitions/apiresponse.APIResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/apiresponse.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Register a new user
+      tags:
+      - users
+securityDefinitions:
+  BearerAuth:
+    description: Type 'Bearer <your_jwt_token>' to authenticate.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
