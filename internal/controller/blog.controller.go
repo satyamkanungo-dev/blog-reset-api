@@ -254,8 +254,8 @@ func (bc *BlogController) DeleteMultiple(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, apiresponse.APIResponse{
-		Code:   http.StatusOK,
+	ctx.JSON(http.StatusMultiStatus, apiresponse.APIResponse{
+		Code:   http.StatusMultiStatus,
 		Status: "success",
 		Data:   deletedblogIds,
 	})
