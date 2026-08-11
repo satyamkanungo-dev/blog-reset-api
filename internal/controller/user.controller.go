@@ -26,8 +26,8 @@ func NewUserController(userservice service.IUserService, authservice service.IAu
 	return &UserController{UserService: userservice, AuthService: authservice}
 }
 
-func (uc *UserController) RegisterRoutes(r gin.IRouter, middleware middleware.IAuthMiddleware) {
-	users := r.Group("/users")
+func (uc *UserController) RegisterRoutes(r *gin.RouterGroup, middleware middleware.IMiddleware) {
+	users := r.Group("/users").Use(middleware.LogMiddleware())
 	{
 		users.POST("/register", uc.Create)
 		users.POST("/login", uc.Get)

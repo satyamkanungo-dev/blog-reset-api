@@ -1,8 +1,10 @@
 package middleware
 
 import (
+	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/satyamkanungo-dev/blog-rest-api/internal/Error"
@@ -10,8 +12,9 @@ import (
 	"github.com/satyamkanungo-dev/blog-rest-api/internal/service"
 )
 
-type IAuthMiddleware interface {
+type IMiddleware interface {
 	AuthMiddleware() gin.HandlerFunc
+	LogMiddleware() gin.HandlerFunc
 }
 
 type Middleware struct {
@@ -22,7 +25,7 @@ func NewMiddleware(authService service.IAuthService) *Middleware {
 	return &Middleware{authService: authService}
 }
 
-func (am *Middleware) AuthMiddleware() gin.HandlerFunc {
+func (m *Middleware) AuthMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		tokenStr := strings.TrimPrefix(ctx.GetHeader("Authorization"), "Bearer ")
 		if tokenStr == "" {
@@ -34,7 +37,7 @@ func (am *Middleware) AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		userId, err := am.authService.ValidateToken(tokenStr)
+		userId, err := m.authService.ValidateToken(tokenStr)
 		if err != nil {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, apiresponse.APIResponse{
 				Code:    http.StatusUnauthorized,
@@ -46,5 +49,18 @@ func (am *Middleware) AuthMiddleware() gin.HandlerFunc {
 
 		ctx.Set("userId", userId)
 		ctx.Next()
+	}
+}
+
+func (m *Middleware) LogMiddleware() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		start := time.Now()
+		log.Printf("[REQUEST] %s %s from %s %s", ctx.Request.Method, ctx.Request.URL.Path, ctx.Request.UserAgent(), ctx.ClientIP())
+
+		ctx.Next()
+
+		latency := time.Since(start)
+		status := ctx.Writer.Status()
+		log.Printf("[RESPONSE] %s %s -> %d (%s)", ctx.Request.Method, ctx.Request.URL.Path, status, latency)
 	}
 }

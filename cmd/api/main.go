@@ -60,10 +60,9 @@ func main() {
 	// controllers
 	userController := controller.NewUserController(userServices, authServices)
 	blogController := controller.NewBlogController(blogServices)
-	mainController := controller.NewMainController(userController, blogController)
 
 	// middleware
-	authMiddleware := middleware.NewMiddleware(authServices)
+	middleware := middleware.NewMiddleware(authServices)
 
 	// router
 	router := gin.Default()
@@ -76,9 +75,10 @@ func main() {
 				"message": "Blog API 👍",
 			})
 		})
-
-		mainController.RegisterRoutes(v1, authMiddleware)
 	}
+
+	userController.RegisterRoutes(v1, middleware)
+	blogController.RegisterRoutes(v1, middleware)
 
 	workDone := make(chan os.Signal, 1)
 

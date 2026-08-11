@@ -22,5 +22,5 @@ type IBlogController interface {
 }
 
 type IController interface {
-	RegisterRoutes(r gin.IRouter, middleware middleware.IAuthMiddleware)
+	RegisterRoutes(r *gin.RouterGroup, middleware middleware.IMiddleware)
 }

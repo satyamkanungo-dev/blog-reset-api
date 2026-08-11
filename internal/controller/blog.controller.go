@@ -20,7 +20,7 @@ func NewBlogController(service service.IBlogService) *BlogController {
 	return &BlogController{BlogService: service}
 }
 
-func (bc *BlogController) RegisterRoutes(r gin.IRouter, middleware middleware.IAuthMiddleware) {
+func (bc *BlogController) RegisterRoutes(r *gin.RouterGroup, middleware middleware.IMiddleware) {
 	blogs := r.Group("/blogs").Use(middleware.AuthMiddleware())
 	{
 		blogs.POST("", bc.Create)
